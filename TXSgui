@@ -9,7 +9,7 @@ local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
 local noclip = false
 local esp = false
-local invisible = false
+local noSit = false
 local infiniteJump = false
 local fpsCounterEnabled = false
 local fpsBoostEnabled = false
@@ -27,11 +27,11 @@ local function showNotification(text, position, duration)
     notification.BackgroundColor3 = Color3.fromRGB(20, 100, 40)
     notification.BorderSizePixel = 0
     notification.Parent = game.CoreGui
-    
+
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(0, 12)
     corner.Parent = notification
-    
+
     local gradient = Instance.new("UIGradient")
     gradient.Color = ColorSequence.new({
         ColorSequenceKeypoint.new(0, Color3.fromRGB(10, 80, 30)),
@@ -39,7 +39,7 @@ local function showNotification(text, position, duration)
     })
     gradient.Rotation = 90
     gradient.Parent = notification
-    
+
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(1, 0, 1, 0)
     label.BackgroundTransparency = 1
@@ -48,23 +48,23 @@ local function showNotification(text, position, duration)
     label.TextSize = 16
     label.Font = Enum.Font.GothamBold
     label.Parent = notification
-    
+
     -- Анимация появления
     TweenService:Create(
         notification,
         TweenInfo.new(0.5),
         {Position = position + UDim2.new(0, 0, 0.05, 0)}
     ):Play()
-    
+
     wait(duration)
-    
+
     -- Анимация исчезновения
     TweenService:Create(
         notification,
         TweenInfo.new(0.5),
         {Position = position}
     ):Play()
-    
+
     wait(0.5)
     notification:Destroy()
 end
@@ -182,46 +182,96 @@ Divider.BackgroundColor3 = Color3.fromRGB(60, 60, 90)
 Divider.BorderSizePixel = 0
 Divider.Parent = MainFrame
 
--- Кнопки вкладок
-local TabsFrame = Instance.new("Frame")
-TabsFrame.Name = "TabsFrame"
-TabsFrame.Size = UDim2.new(1, -40, 0, 30)
-TabsFrame.Position = UDim2.new(0, 20, 0, 70)
-TabsFrame.BackgroundTransparency = 1
-TabsFrame.Parent = MainFrame
+-- Заменяем старый TabsFrame на ScrollingFrame с горизонтальным скроллом
+local TabsScrollingFrame = Instance.new("ScrollingFrame")
+TabsScrollingFrame.Name = "TabsScrollingFrame"
+TabsScrollingFrame.Size = UDim2.new(1, -40, 0, 30)
+TabsScrollingFrame.Position = UDim2.new(0, 20, 0, 70)
+TabsScrollingFrame.BackgroundTransparency = 1
+TabsScrollingFrame.ScrollBarThickness = 6
+TabsScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 140)
+TabsScrollingFrame.CanvasSize = UDim2.new(2, 0, 0, 0)
+TabsScrollingFrame.VerticalScrollBarInset = Enum.ScrollBarInset.None
+TabsScrollingFrame.HorizontalScrollBarInset = Enum.ScrollBarInset.None
+TabsScrollingFrame.Parent = MainFrame
 
+local TabsLayout = Instance.new("UIListLayout")
+TabsLayout.FillDirection = Enum.FillDirection.Horizontal
+TabsLayout.Padding = UDim.new(0, 5)
+TabsLayout.SortOrder = Enum.SortOrder.LayoutOrder
+TabsLayout.Parent = TabsScrollingFrame
+
+-- Обновляем кнопки вкладок с новыми размерами и позициями
 local PlayerTabButton = Instance.new("TextButton")
 PlayerTabButton.Name = "PlayerTabButton"
-PlayerTabButton.Size = UDim2.new(0.3, -5, 1, 0)
-PlayerTabButton.Position = UDim2.new(0, 0, 0, 0)
+PlayerTabButton.Size = UDim2.new(0, 70, 0, 30)
+PlayerTabButton.LayoutOrder = 1
 PlayerTabButton.BackgroundColor3 = Color3.fromRGB(0, 150, 200)
 PlayerTabButton.Text = "Player"
 PlayerTabButton.TextColor3 = Color3.new(1, 1, 1)
 PlayerTabButton.TextSize = 14
 PlayerTabButton.Font = Enum.Font.GothamBold
-PlayerTabButton.Parent = TabsFrame
+PlayerTabButton.Parent = TabsScrollingFrame
 
 local ESPTabButton = Instance.new("TextButton")
 ESPTabButton.Name = "ESPTabButton"
-ESPTabButton.Size = UDim2.new(0.3, -5, 1, 0)
-ESPTabButton.Position = UDim2.new(0.35, 0, 0, 0)
+ESPTabButton.Size = UDim2.new(0, 70, 0, 30)
+ESPTabButton.LayoutOrder = 2
 ESPTabButton.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
 ESPTabButton.Text = "ESP"
 ESPTabButton.TextColor3 = Color3.new(1, 1, 1)
 ESPTabButton.TextSize = 14
 ESPTabButton.Font = Enum.Font.GothamBold
-ESPTabButton.Parent = TabsFrame
+ESPTabButton.Parent = TabsScrollingFrame
 
 local FPSTabButton = Instance.new("TextButton")
 FPSTabButton.Name = "FPSTabButton"
-FPSTabButton.Size = UDim2.new(0.3, 0, 1, 0)
-FPSTabButton.Position = UDim2.new(0.7, 0, 0, 0)
+FPSTabButton.Size = UDim2.new(0, 70, 0, 30)
+FPSTabButton.LayoutOrder = 3
 FPSTabButton.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
 FPSTabButton.Text = "FPS"
 FPSTabButton.TextColor3 = Color3.new(1, 1, 1)
 FPSTabButton.TextSize = 14
 FPSTabButton.Font = Enum.Font.GothamBold
-FPSTabButton.Parent = TabsFrame
+FPSTabButton.Parent = TabsScrollingFrame
+
+local GameTabButton = Instance.new("TextButton")
+GameTabButton.Name = "GameTabButton"
+GameTabButton.Size = UDim2.new(0, 70, 0, 30)
+GameTabButton.LayoutOrder = 4
+GameTabButton.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+GameTabButton.Text = "Game"
+GameTabButton.TextColor3 = Color3.new(1, 1, 1)
+GameTabButton.TextSize = 14
+GameTabButton.Font = Enum.Font.GothamBold
+GameTabButton.Parent = TabsScrollingFrame
+
+local ToolTabButton = Instance.new("TextButton")
+ToolTabButton.Name = "ToolTabButton"
+ToolTabButton.Size = UDim2.new(0, 70, 0, 30)
+ToolTabButton.LayoutOrder = 5
+ToolTabButton.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+ToolTabButton.Text = "Tool"
+ToolTabButton.TextColor3 = Color3.new(1, 1, 1)
+ToolTabButton.TextSize = 14
+ToolTabButton.Font = Enum.Font.GothamBold
+ToolTabButton.Parent = TabsScrollingFrame
+
+local ScriptTabButton = Instance.new("TextButton")
+ScriptTabButton.Name = "ScriptTabButton"
+ScriptTabButton.Size = UDim2.new(0, 70, 0, 30)
+ScriptTabButton.LayoutOrder = 6
+ScriptTabButton.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+ScriptTabButton.Text = "Script"
+ScriptTabButton.TextColor3 = Color3.new(1, 1, 1)
+ScriptTabButton.TextSize = 14
+ScriptTabButton.Font = Enum.Font.GothamBold
+ScriptTabButton.Parent = TabsScrollingFrame
+
+-- Автоматически обновляем размер CanvasSize при изменении содержимого
+TabsLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+    TabsScrollingFrame.CanvasSize = UDim2.new(0, TabsLayout.AbsoluteContentSize.X, 0, 0)
+end)
 
 -- Закругление для кнопок вкладок
 local function addTabCorner(button)
@@ -233,6 +283,9 @@ end
 addTabCorner(PlayerTabButton)
 addTabCorner(ESPTabButton)
 addTabCorner(FPSTabButton)
+addTabCorner(GameTabButton)
+addTabCorner(ToolTabButton)
+addTabCorner(ScriptTabButton)
 
 -- Создаем область скролла
 local ScrollFrame = Instance.new("ScrollingFrame")
@@ -271,13 +324,34 @@ FPSTab.BackgroundTransparency = 1
 FPSTab.Visible = false
 FPSTab.Parent = ScrollFrame
 
+local GameTab = Instance.new("Frame")
+GameTab.Name = "GameTab"
+GameTab.Size = UDim2.new(1, 0, 0, 0)
+GameTab.BackgroundTransparency = 1
+GameTab.Visible = false
+GameTab.Parent = ScrollFrame
+
+local ToolTab = Instance.new("Frame")
+ToolTab.Name = "ToolTab"
+ToolTab.Size = UDim2.new(1, 0, 0, 0)
+ToolTab.BackgroundTransparency = 1
+ToolTab.Visible = false
+ToolTab.Parent = ScrollFrame
+
+local ScriptTab = Instance.new("Frame")
+ScriptTab.Name = "ScriptTab"
+ScriptTab.Size = UDim2.new(1, 0, 0, 0)
+ScriptTab.BackgroundTransparency = 1
+ScriptTab.Visible = false
+ScriptTab.Parent = ScrollFrame
+
 -- Layout для вкладок
 local function createTabLayout(tab)
     local layout = Instance.new("UIListLayout")
     layout.Padding = UDim.new(0, 8)
     layout.SortOrder = Enum.SortOrder.LayoutOrder
     layout.Parent = tab
-    
+
     layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
         tab.Size = UDim2.new(1, 0, 0, layout.AbsoluteContentSize.Y)
     end)
@@ -286,6 +360,9 @@ end
 createTabLayout(PlayerTab)
 createTabLayout(ESPTab)
 createTabLayout(FPSTab)
+createTabLayout(GameTab)
+createTabLayout(ToolTab)
+createTabLayout(ScriptTab)
 
 -- Функция для создания кнопок с учетом вкладок
 local function createButton(text, parent)
@@ -300,11 +377,11 @@ local function createButton(text, parent)
     button.Font = Enum.Font.GothamBold
     button.AutoButtonColor = false
     button.Parent = parent
-    
+
     local buttonCorner = Instance.new("UICorner")
     buttonCorner.CornerRadius = UDim.new(0, 8)
     buttonCorner.Parent = button
-    
+
     local statusFrame = Instance.new("Frame")
     statusFrame.Name = "Status"
     statusFrame.Size = UDim2.new(0, 8, 0.8, 0)
@@ -312,11 +389,11 @@ local function createButton(text, parent)
     statusFrame.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
     statusFrame.BorderSizePixel = 0
     statusFrame.Parent = button
-    
+
     local statusCorner = Instance.new("UICorner")
     statusCorner.CornerRadius = UDim.new(0.5, 0)
     statusCorner.Parent = statusFrame
-    
+
     button.MouseEnter:Connect(function()
         TweenService:Create(
             button,
@@ -324,7 +401,7 @@ local function createButton(text, parent)
             {BackgroundColor3 = Color3.fromRGB(50, 50, 75)}
         ):Play()
     end)
-    
+
     button.MouseLeave:Connect(function()
         TweenService:Create(
             button,
@@ -332,7 +409,7 @@ local function createButton(text, parent)
             {BackgroundColor3 = Color3.fromRGB(40, 40, 60)}
         ):Play()
     end)
-    
+
     return button
 end
 
@@ -344,7 +421,7 @@ local function createInputField(text, fieldName, parent)
     frame.LayoutOrder = #parent:GetChildren()
     frame.BackgroundTransparency = 1
     frame.Parent = parent
-    
+
     local textBox = Instance.new("TextBox")
     textBox.Name = fieldName
     textBox.Size = UDim2.new(0.7, 0, 1, 0)
@@ -357,11 +434,11 @@ local function createInputField(text, fieldName, parent)
     textBox.Font = Enum.Font.Gotham
     textBox.ClearTextOnFocus = false
     textBox.Parent = frame
-    
+
     local textBoxCorner = Instance.new("UICorner")
     textBoxCorner.CornerRadius = UDim.new(0, 6)
     textBoxCorner.Parent = textBox
-    
+
     local button = Instance.new("TextButton")
     button.Name = text .. "Button"
     button.Size = UDim2.new(0.25, -5, 1, 0)
@@ -372,11 +449,11 @@ local function createInputField(text, fieldName, parent)
     button.TextSize = 14
     button.Font = Enum.Font.GothamBold
     button.Parent = frame
-    
+
     local buttonCorner = Instance.new("UICorner")
     buttonCorner.CornerRadius = UDim.new(0, 6)
     buttonCorner.Parent = button
-    
+
     button.MouseEnter:Connect(function()
         TweenService:Create(
             button,
@@ -384,7 +461,7 @@ local function createInputField(text, fieldName, parent)
             {BackgroundColor3 = Color3.fromRGB(70, 70, 110)}
         ):Play()
     end)
-    
+
     button.MouseLeave:Connect(function()
         TweenService:Create(
             button,
@@ -392,7 +469,7 @@ local function createInputField(text, fieldName, parent)
             {BackgroundColor3 = Color3.fromRGB(50, 50, 80)}
         ):Play()
     end)
-    
+
     return textBox, button
 end
 
@@ -400,7 +477,7 @@ end
 local Speed_pole, SpeedButton = createInputField("Speed", "Speed_pole", PlayerTab)
 local Jump_pole, JumpButton = createInputField("Jump", "Jump_pole", PlayerTab)
 local NoclipButton = createButton("Noclip", PlayerTab)
-local InvisibleButton = createButton("Invisible", PlayerTab)
+local NoSitButton = createButton("No Sit", PlayerTab)
 local InfinityJumpButton = createButton("Infinity Jump", PlayerTab)
 
 -- Создаем элементы для вкладки ESP
@@ -410,6 +487,18 @@ local ESPButton = createButton("ESP", ESPTab)
 local FPSCounterButton = createButton("FPS counter", FPSTab)
 local FPSBoostButton = createButton("FPS boost", FPSTab)
 local FullBlickButton = createButton("FullBlick", FPSTab)
+
+-- Создаем элементы для вкладки Game
+local AllPlayersButton = createButton("All players", GameTab)
+local TPPlayersButton = createButton("TP players", GameTab)
+
+-- Создаем элементы для вкладки Tool
+local TPToolButton = createButton("TP tool", ToolTab)
+
+-- Создаем элементы для вкладки Script
+local InvisibleScriptButton = createButton("Invisible", ScriptTab)
+local FlyScriptButton = createButton("Fly", ScriptTab)
+local InfinityYieldButton = createButton("Infinity yield", ScriptTab)
 
 -- Функции
 local function toggleButton(button, state)
@@ -422,7 +511,7 @@ end
 local function toggleNoclip()
     noclip = not noclip
     toggleButton(NoclipButton, noclip)
-    
+
     if character then
         for _, part in ipairs(character:GetDescendants()) do
             if part:IsA("BasePart") then
@@ -432,18 +521,31 @@ local function toggleNoclip()
     end
 end
 
+-- No Sit функция
+local function toggleNoSit()
+    noSit = not noSit
+    toggleButton(NoSitButton, noSit)
+    
+    if noSit and humanoid then
+        humanoid.Sit = false
+        humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
+    else
+        humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
+    end
+end
+
 -- Улучшенный ESP: виден через стены и на любом расстоянии
 local function createESP(player)
     if player == Players.LocalPlayer then return end
-    
+
     local char = player.Character
     if not char then return end
-    
+
     -- Удаляем старый ESP если есть
     if espItems[player] then
         espItems[player]:Destroy()
     end
-    
+
     local highlight = Instance.new("Highlight")
     highlight.Name = player.Name .. "_ESP"
     highlight.OutlineColor = Color3.new(0, 1, 1)
@@ -453,14 +555,14 @@ local function createESP(player)
     highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop -- Видно через стены
     highlight.Adornee = char
     highlight.Parent = char
-    
+
     -- Обновляем ESP при изменении персонажа
     local function characterAdded(newChar)
         highlight.Adornee = newChar
     end
-    
+
     player.CharacterAdded:Connect(characterAdded)
-    
+
     espItems[player] = highlight
 end
 
@@ -474,7 +576,7 @@ end
 local function toggleESP()
     esp = not esp
     toggleButton(ESPButton, esp)
-    
+
     if esp then
         for _, player in ipairs(Players:GetPlayers()) do
             createESP(player)
@@ -484,23 +586,6 @@ local function toggleESP()
     else
         for player, _ in pairs(espItems) do
             removeESP(player)
-        end
-    end
-end
-
-local function toggleInvisibility()
-    invisible = not invisible
-    toggleButton(InvisibleButton, invisible)
-    
-    if character then
-        for _, part in ipairs(character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                if invisible then
-                    part.LocalTransparencyModifier = 1
-                else
-                    part.LocalTransparencyModifier = 0
-                end
-            end
         end
     end
 end
@@ -538,29 +623,29 @@ local fpsConnection = nil
 local function toggleFPSCounter()
     fpsCounterEnabled = not fpsCounterEnabled
     toggleButton(FPSCounterButton, fpsCounterEnabled)
-    
+
     if fpsCounterEnabled then
         fpsLabel = Instance.new("TextLabel")
         fpsLabel.Name = "FPSLabel"
         fpsLabel.Size = UDim2.new(0, 100, 0, 30)
-        
+
         -- Размещение для разных устройств
         if UserInputService.TouchEnabled then
             fpsLabel.Position = UDim2.new(0, 10, 0, 10) -- Левый верхний угол для телефона
         else
             fpsLabel.Position = UDim2.new(0.5, -50, 0, 10) -- Центр верхней части для ПК
         end
-        
+
         fpsLabel.BackgroundTransparency = 0.7
         fpsLabel.BackgroundColor3 = Color3.new(0, 0, 0)
         fpsLabel.TextColor3 = Color3.new(1, 1, 1)
         fpsLabel.Text = "FPS: "
         fpsLabel.TextSize = 16
         fpsLabel.Parent = ScreenGui
-        
+
         local frameCount = 0
         local lastUpdate = time()
-        
+
         fpsConnection = RunService.RenderStepped:Connect(function(dt)
             frameCount = frameCount + 1
             local currentTime = time()
@@ -588,7 +673,7 @@ local originalMaterials = {}
 local function toggleFPSBoost()
     fpsBoostEnabled = not fpsBoostEnabled
     toggleButton(FPSBoostButton, fpsBoostEnabled)
-    
+
     if fpsBoostEnabled then
         -- Сохраняем оригинальные материалы перед изменением
         for _, obj in ipairs(workspace:GetDescendants()) do
@@ -596,18 +681,18 @@ local function toggleFPSBoost()
                 originalMaterials[obj] = obj.Material
             end
         end
-        
+
         -- Удаление всех текстур и материалов
         for _, obj in ipairs(workspace:GetDescendants()) do
             if obj:IsA("Texture") or obj:IsA("Decal") then
                 obj:Destroy()
             end
-            
+
             if obj:IsA("BasePart") then
                 -- Заменяем материал на Plastic
                 obj.Material = Enum.Material.Plastic
                 obj.Reflectance = 0
-                
+
                 -- Убираем все шпильки (studs) на партах
                 obj.TopSurface = Enum.SurfaceType.Smooth
                 obj.BottomSurface = Enum.SurfaceType.Smooth
@@ -616,17 +701,17 @@ local function toggleFPSBoost()
                 obj.FrontSurface = Enum.SurfaceType.Smooth
                 obj.BackSurface = Enum.SurfaceType.Smooth
             end
-            
+
             if obj:IsA("ParticleEmitter") or obj:IsA("Fire") or obj:IsA("Smoke") then
                 obj:Destroy()
             end
-            
+
             -- Оптимизация для специальных объектов
             if obj:IsA("MeshPart") then
                 obj.TextureID = ""
             end
         end
-        
+
         -- Оптимизация освещения
         Lighting.GlobalShadows = false
         Lighting.FogEnd = 100000
@@ -645,20 +730,250 @@ end
 local function toggleFullBlick()
     fullBlickEnabled = not fullBlickEnabled
     toggleButton(FullBlickButton, fullBlickEnabled)
-    
+
     Lighting.GlobalShadows = not fullBlickEnabled
+end
+
+-- Функция для создания меню игроков
+local function createPlayersMenu(isTPMenu)
+    local menuGui = Instance.new("ScreenGui")
+    menuGui.Name = isTPMenu and "TPPlayersMenu" or "AllPlayersMenu"
+    menuGui.Parent = game.CoreGui
+    menuGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+    local menuFrame = Instance.new("Frame")
+    menuFrame.Name = "MenuFrame"
+    menuFrame.Size = UDim2.new(0, 300, 0, 400)
+    menuFrame.Position = UDim2.new(0.5, -150, 0.5, -200)
+    menuFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
+    menuFrame.BackgroundTransparency = 0.2
+    menuFrame.BorderSizePixel = 0
+    menuFrame.Active = true
+    menuFrame.Draggable = true
+    menuFrame.Parent = menuGui
+
+    local menuGradient = Instance.new("UIGradient")
+    menuGradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 20, 35)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 10, 20))
+    })
+    menuGradient.Rotation = 90
+    menuGradient.Parent = menuFrame
+
+    local menuCorner = Instance.new("UICorner")
+    menuCorner.CornerRadius = UDim.new(0, 12)
+    menuCorner.Parent = menuFrame
+
+    local menuShadow = Instance.new("ImageLabel")
+    menuShadow.Name = "DropShadow"
+    menuShadow.Image = "rbxassetid://5234388158"
+    menuShadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+    menuShadow.ImageTransparency = 0.8
+    menuShadow.ScaleType = Enum.ScaleType.Slice
+    menuShadow.SliceCenter = Rect.new(49, 49, 451, 451)
+    menuShadow.Size = UDim2.new(1, 20, 1, 20)
+    menuShadow.Position = UDim2.new(0, -10, 0, -10)
+    menuShadow.BackgroundTransparency = 1
+    menuShadow.Parent = menuFrame
+
+    local headerFrame = Instance.new("Frame")
+    headerFrame.Name = "HeaderFrame"
+    headerFrame.Size = UDim2.new(1, 0, 0, 40)
+    headerFrame.Position = UDim2.new(0, 0, 0, 10)
+    headerFrame.BackgroundTransparency = 1
+    headerFrame.Parent = menuFrame
+
+    local header = Instance.new("TextLabel")
+    header.Name = "Header"
+    header.Size = UDim2.new(0.7, 0, 1, 0)
+    header.Position = UDim2.new(0.15, 0, 0, 0)
+    header.BackgroundTransparency = 1
+    header.Text = isTPMenu and "TP Players" or "All Players"
+    header.TextColor3 = Color3.fromRGB(0, 220, 255)
+    header.TextSize = 24
+    header.Font = Enum.Font.GothamBlack
+    header.Parent = headerFrame
+
+    local closeButton = Instance.new("TextButton")
+    closeButton.Name = "CloseButton"
+    closeButton.Size = UDim2.new(0, 25, 0, 25)
+    closeButton.Position = UDim2.new(0.95, -25, 0.5, -12)
+    closeButton.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
+    closeButton.Text = "X"
+    closeButton.TextColor3 = Color3.new(1, 1, 1)
+    closeButton.TextSize = 18
+    closeButton.Font = Enum.Font.GothamBold
+    closeButton.Parent = headerFrame
+
+    local closeCorner = Instance.new("UICorner")
+    closeCorner.CornerRadius = UDim.new(0, 6)
+    closeCorner.Parent = closeButton
+
+    local scrollFrame = Instance.new("ScrollingFrame")
+    scrollFrame.Name = "ScrollFrame"
+    scrollFrame.Size = UDim2.new(1, -20, 0, 340)
+    scrollFrame.Position = UDim2.new(0, 10, 0, 50)
+    scrollFrame.BackgroundTransparency = 1
+    scrollFrame.ScrollBarThickness = 6
+    scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    scrollFrame.Parent = menuFrame
+
+    local scrollLayout = Instance.new("UIListLayout")
+    scrollLayout.Padding = UDim.new(0, 8)
+    scrollLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    scrollLayout.Parent = scrollFrame
+
+    -- Добавляем игроков в меню
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= Players.LocalPlayer then
+            local playerFrame = Instance.new("Frame")
+            playerFrame.Name = player.Name .. "Frame"
+            playerFrame.Size = UDim2.new(1, 0, 0, 50)
+            playerFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+            playerFrame.BackgroundTransparency = 0.5
+            playerFrame.Parent = scrollFrame
+
+            local playerCorner = Instance.new("UICorner")
+            playerCorner.CornerRadius = UDim.new(0, 8)
+            playerCorner.Parent = playerFrame
+
+            -- Аватар игрока
+            local avatar = Instance.new("ImageLabel")
+            avatar.Name = "Avatar"
+            avatar.Size = UDim2.new(0, 40, 0, 40)
+            avatar.Position = UDim2.new(0, 5, 0.5, -20)
+            avatar.BackgroundTransparency = 1
+            avatar.Image = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. player.UserId .. "&width=150&height=150&format=png"
+            avatar.Parent = playerFrame
+
+            -- Имя игрока
+            local nameLabel = Instance.new("TextLabel")
+            nameLabel.Name = "NameLabel"
+            nameLabel.Size = UDim2.new(0.5, 0, 1, 0)
+            nameLabel.Position = UDim2.new(0, 50, 0, 0)
+            nameLabel.BackgroundTransparency = 1
+            nameLabel.Text = player.Name
+            nameLabel.TextColor3 = Color3.new(1, 1, 1)
+            nameLabel.TextSize = 16
+            nameLabel.Font = Enum.Font.GothamBold
+            nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+            nameLabel.Parent = playerFrame
+
+            if isTPMenu then
+                -- Кнопка телепортации
+                local tpButton = Instance.new("TextButton")
+                tpButton.Name = "TPButton"
+                tpButton.Size = UDim2.new(0, 80, 0, 30)
+                tpButton.Position = UDim2.new(1, -85, 0.5, -15)
+                tpButton.BackgroundColor3 = Color3.fromRGB(0, 150, 200)
+                tpButton.Text = "TP"
+                tpButton.TextColor3 = Color3.new(1, 1, 1)
+                tpButton.TextSize = 14
+                tpButton.Font = Enum.Font.GothamBold
+                tpButton.Parent = playerFrame
+
+                local tpCorner = Instance.new("UICorner")
+                tpCorner.CornerRadius = UDim.new(0, 6)
+                tpCorner.Parent = tpButton
+
+                tpButton.MouseButton1Click:Connect(function()
+                    local targetChar = player.Character
+                    if targetChar and targetChar:FindFirstChild("HumanoidRootPart") then
+                        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+                        if humanoidRootPart then
+                            humanoidRootPart.CFrame = targetChar.HumanoidRootPart.CFrame
+                        end
+                    end
+                end)
+            else
+                -- Кнопка копирования имени
+                local copyButton = Instance.new("TextButton")
+                copyButton.Name = "CopyButton"
+                copyButton.Size = UDim2.new(0, 80, 0, 30)
+                copyButton.Position = UDim2.new(1, -85, 0.5, -15)
+                copyButton.BackgroundColor3 = Color3.fromRGB(0, 150, 200)
+                copyButton.Text = "Copy"
+                copyButton.TextColor3 = Color3.new(1, 1, 1)
+                copyButton.TextSize = 14
+                copyButton.Font = Enum.Font.GothamBold
+                copyButton.Parent = playerFrame
+
+                local copyCorner = Instance.new("UICorner")
+                copyCorner.CornerRadius = UDim.new(0, 6)
+                copyCorner.Parent = copyButton
+
+                copyButton.MouseButton1Click:Connect(function()
+                    setclipboard(player.Name)
+                    showNotification("Copied: " .. player.Name, UDim2.new(0.25, 0, -0.05, 0), 2)
+                end)
+            end
+        end
+    end
+
+    -- Обновляем размер скролла
+    scrollLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        scrollFrame.CanvasSize = UDim2.new(0, 0, 0, scrollLayout.AbsoluteContentSize.Y + 10)
+    end)
+
+    closeButton.MouseButton1Click:Connect(function()
+        menuGui:Destroy()
+    end)
+
+    return menuGui
+end
+
+-- Функция для TP tool
+local function giveTPTool()
+    local tool = Instance.new("Tool")
+    tool.Name = "TP Tool"
+    tool.RequiresHandle = false
+    tool.Parent = player.Backpack or player.Character
+
+    tool.Activated:Connect(function()
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart then
+            local mouse = player:GetMouse()
+            if mouse then
+                humanoidRootPart.CFrame = CFrame.new(mouse.Hit.Position)
+            end
+        end
+    end)
+
+    showNotification("TP Tool added to inventory", UDim2.new(0.25, 0, -0.05, 0), 3)
+end
+
+-- Функции для скриптов
+local function executeInvisibleScript()
+    loadstring(game:HttpGet('https://pastebin.com/raw/3Rnd9rHf'))("t.me/scriptrobox")
+    showNotification("Invisible script executed", UDim2.new(0.25, 0, -0.05, 0), 3)
+end
+
+local function executeFlyScript()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()
+    showNotification("Fly script executed", UDim2.new(0.25, 0, -0.05, 0), 3)
+end
+
+local function executeInfinityYield()
+    loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
+    showNotification("Infinity Yield executed", UDim2.new(0.25, 0, -0.05, 0), 3)
 end
 
 -- Обработчики кнопок
 NoclipButton.MouseButton1Click:Connect(toggleNoclip)
+NoSitButton.MouseButton1Click:Connect(toggleNoSit)
 ESPButton.MouseButton1Click:Connect(toggleESP)
-InvisibleButton.MouseButton1Click:Connect(toggleInvisibility)
 InfinityJumpButton.MouseButton1Click:Connect(toggleInfinityJump)
 FPSCounterButton.MouseButton1Click:Connect(toggleFPSCounter)
 FPSBoostButton.MouseButton1Click:Connect(toggleFPSBoost)
 FullBlickButton.MouseButton1Click:Connect(toggleFullBlick)
 SpeedButton.MouseButton1Click:Connect(setSpeed)
 JumpButton.MouseButton1Click:Connect(setJump)
+AllPlayersButton.MouseButton1Click:Connect(function() createPlayersMenu(false) end)
+TPPlayersButton.MouseButton1Click:Connect(function() createPlayersMenu(true) end)
+TPToolButton.MouseButton1Click:Connect(giveTPTool)
+InvisibleScriptButton.MouseButton1Click:Connect(executeInvisibleScript)
+FlyScriptButton.MouseButton1Click:Connect(executeFlyScript)
+InfinityYieldButton.MouseButton1Click:Connect(executeInfinityYield)
 
 -- Функция переключения вкладок
 local function switchTab(tabName)
@@ -666,12 +981,18 @@ local function switchTab(tabName)
     PlayerTabButton.BackgroundColor3 = (tabName == "Player") and Color3.fromRGB(0, 150, 200) or Color3.fromRGB(40, 40, 60)
     ESPTabButton.BackgroundColor3 = (tabName == "ESP") and Color3.fromRGB(0, 150, 200) or Color3.fromRGB(40, 40, 60)
     FPSTabButton.BackgroundColor3 = (tabName == "FPS") and Color3.fromRGB(0, 150, 200) or Color3.fromRGB(40, 40, 60)
-    
+    GameTabButton.BackgroundColor3 = (tabName == "Game") and Color3.fromRGB(0, 150, 200) or Color3.fromRGB(40, 40, 60)
+    ToolTabButton.BackgroundColor3 = (tabName == "Tool") and Color3.fromRGB(0, 150, 200) or Color3.fromRGB(40, 40, 60)
+    ScriptTabButton.BackgroundColor3 = (tabName == "Script") and Color3.fromRGB(0, 150, 200) or Color3.fromRGB(40, 40, 60)
+
     -- Показываем выбранную вкладку, скрываем остальные
     PlayerTab.Visible = (tabName == "Player")
     ESPTab.Visible = (tabName == "ESP")
     FPSTab.Visible = (tabName == "FPS")
-    
+    GameTab.Visible = (tabName == "Game")
+    ToolTab.Visible = (tabName == "Tool")
+    ScriptTab.Visible = (tabName == "Script")
+
     currentTab = tabName
 end
 
@@ -688,43 +1009,55 @@ FPSTabButton.MouseButton1Click:Connect(function()
     switchTab("FPS")
 end)
 
+GameTabButton.MouseButton1Click:Connect(function()
+    switchTab("Game")
+end)
+
+ToolTabButton.MouseButton1Click:Connect(function()
+    switchTab("Tool")
+end)
+
+ScriptTabButton.MouseButton1Click:Connect(function()
+    switchTab("Script")
+end)
+
 -- Функция минимизации/максимизации
 local function toggleMinimize()
     minimized = not minimized
-    
+
     if minimized then
         -- Минимизация
         MinimizeButton.Text = "+"
-        
+
         -- Скрываем все элементы, кроме заголовка
         ByLabel.Visible = false
         Divider.Visible = false
-        TabsFrame.Visible = false
+        TabsScrollingFrame.Visible = false
         ScrollFrame.Visible = false
-        
+
         -- Перемещаем заголовок в центр
         Header.Size = UDim2.new(1, -50, 1, 0)
         Header.Position = UDim2.new(0.25, 0, 0, 0)
         Header.TextXAlignment = Enum.TextXAlignment.Center
-        
+
         -- Уменьшаем размер окна
         MainFrame.Size = UDim2.new(0, 150, 0, 40)
         MainFrame.Position = UDim2.new(0.5, -75, 0.5, -20)
     else
         -- Максимизация
         MinimizeButton.Text = "_"
-        
+
         -- Показываем элементы
         ByLabel.Visible = true
         Divider.Visible = true
-        TabsFrame.Visible = true
+        TabsScrollingFrame.Visible = true
         ScrollFrame.Visible = true
-        
+
         -- Восстанавливаем заголовок
         Header.Size = UDim2.new(0.7, 0, 1, 0)
         Header.Position = UDim2.new(0.15, 0, 0, 0)
         Header.TextXAlignment = Enum.TextXAlignment.Left
-        
+
         -- Восстанавливаем размер окна
         MainFrame.Size = UDim2.new(0, 280, 0, 300)
         MainFrame.Position = UDim2.new(0.5, -140, 0.5, -150)
@@ -750,19 +1083,26 @@ RunService.Stepped:Connect(function()
     end
 end)
 
+-- No Sit петля
+RunService.Heartbeat:Connect(function()
+    if noSit and humanoid then
+        humanoid.Sit = false
+    end
+end)
+
 -- Обновление при смене персонажа
 player.CharacterAdded:Connect(function(newChar)
     character = newChar
     humanoid = newChar:WaitForChild("Humanoid")
-    
+
     -- Восстановление состояний
     if noclip then
         toggleNoclip()
         toggleNoclip()
     end
-    if invisible then
-        toggleInvisibility()
-        toggleInvisibility()
+    if noSit then
+        toggleNoSit()
+        toggleNoSit()
     end
     if esp then
         -- Обновляем ESP для всех игроков
